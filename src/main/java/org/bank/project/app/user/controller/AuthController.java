@@ -13,6 +13,8 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import static org.bank.project.app.util.Constants.MESSAGE;
+
 @RestController
 @RequestMapping("/banking-app/api/rest/v1/auth")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -38,15 +40,22 @@ public class AuthController {
     }
 
     @GetMapping("refresh")
-    public Mono<ResponseEntity<Payload>> refreshToken(@RequestHeader("REFRESH_TOKEN") String token,
+    public Mono<ResponseEntity<Payload>> refreshToken(@RequestHeader("Refresh-Token") String token,
             ServerHttpRequest request) {
         return Mono.just(new ResponseEntity<>(
                 userService.generateTokenFromRefreshToken(token, request.getURI().getPath()), HttpStatus.OK));
     }
 
+    @PostMapping("change-password")
+    public Mono<ResponseEntity<Payload>> changePassword(ServerHttpRequest request,
+            @RequestHeader("Current-Email") String email, @RequestHeader("New-Password") String password) {
+        return userService.changePassword(request.getURI().getPath(), email, password)
+                .flatMap(payload -> Mono.just(ResponseEntity.ok(payload)));
+    }
+
     private Payload getErrorPayload(String path) {
         Payload payload = new Payload(path, HttpStatus.UNAUTHORIZED);
-        payload.put("message", "restricted access");
+        payload.put(MESSAGE, "restricted access");
         return payload;
     }
 

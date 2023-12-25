@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
 import reactor.core.publisher.Mono;
 
+import static org.bank.project.app.util.Constants.MESSAGE;
+
 @ControllerAdvice
 public class BankingExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -20,7 +22,7 @@ public class BankingExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<Payload>> handleBankingException(Exception exception, ServerHttpRequest request) {
         Payload payload = new Payload(request.getURI().getPath(), HttpStatus.INTERNAL_SERVER_ERROR);
-        payload.put("message", exception.getMessage());
+        payload.put(MESSAGE, exception.getMessage());
         return Mono.just(new ResponseEntity<>(payload, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 }
